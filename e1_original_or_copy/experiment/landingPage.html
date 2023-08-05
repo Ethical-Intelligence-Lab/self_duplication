@@ -1,0 +1,184 @@
+
+<html>
+
+	<head>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+		<script src="https://scorsese.wjh.harvard.edu/turk/tools/TimTurkToolsPlus.js"></script>
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+		<script src="js/sweetalert.min.js"></script>
+		<script src="js/sweetalert-master/dist/sweetalert.min.js"></script>
+		<link rel="stylesheet" type="text/css" href="js/sweetalert-master/dist/sweetalert.css">
+
+		<script>
+
+	// This is the first page a subject sees, before being directed to one of seven conditions
+	// If subject has previously participated, throw a message, otherwise allocate to the condition with least no. of completed subjects
+	//Paste this code into the mturk url window
+
+			names_one = [], names_two = [], names_three = [], names_four = []; 
+
+			length_one = [], length_two = [], length_three = [], length_four = [];
+
+			expMat = ["1_alive_oneCopy", "2_alive_twoCopies", "3_dead_oneCopy", "4_dead_twoCopies"];
+
+			dir = "https://scorsese.wjh.harvard.edu/turk/experiments/jdf/singleIdentity_e2_particles/";
+
+			$(document).ready(function(){
+
+					workerId = gup('workerId'); //for piloting, just make worke3rId = any initial, e.g. "xyz"
+					console.log("worker id is " + workerId);
+					assignmentId = gup('assignmentId');
+					console.log("assignment id is " + assignmentId);
+
+					if (!IsOnTurk() && assignmentId == "NONE") {
+					  		assignmentId = prompt("Doesn't look like you are on Turk, so you're probably testing. Enter an ID to save your data with:", "assignmentId");
+						} else if (assignmentId == "ASSIGNMENT_ID_NOT_AVAILABLE") {
+							console.log("got here");
+							//$("a.startexperimentbutton").show();
+							$("[data-toggle='tooltip']").tooltip();
+						} else {
+							$("a.startexperimentbutton").show();
+							$("#check").show();
+							//$("a.startexperimentbutton").removeClass('disabled');
+							$("[data-toggle='tooltip']").tooltip('destroy');
+						}
+			    	});
+
+					function SaveStuff() {
+						turkerCheckId = $('#turkerId').val();
+						var checking = 1;
+						Start(turkerCheckId,checking);
+					}
+
+
+			function Start(workerId,checking) {
+
+						$.when(
+
+							$.getJSON( "https://scorsese.wjh.harvard.edu/turk/tools/getSubjects.php?experimenter=jdf&experiment=1_alive_oneCopy"),
+							$.getJSON( "https://scorsese.wjh.harvard.edu/turk/tools/getSubjects.php?experimenter=jdf&experiment=2_alive_twoCopies"),
+							$.getJSON( "https://scorsese.wjh.harvard.edu/turk/tools/getSubjects.php?experimenter=jdf&experiment=3_dead_oneCopy"),
+							$.getJSON( "https://scorsese.wjh.harvard.edu/turk/tools/getSubjects.php?experimenter=jdf&experiment=4_dead_twoCopies"))
+
+							.then(function(d1,d2,d3,d4){
+
+								for (var i= 0; i<d1[0].length; i++) {
+									 names_one.push(d1[0][i].workerId);
+									 length_one.push(d1.length);
+								};
+								for (var i= 0; i<d2[0].length; i++) {
+									 names_two.push(d2[0][i].workerId);
+									 length_two.push(d2.length);
+								};
+								for (var i= 0; i<d3[0].length; i++) {
+									 names_three.push(d3[0][i].workerId);
+									 length_three.push(d3.length);
+								};
+								for (var i= 0; i<d4[0].length; i++) {
+									 names_four.push(d4[0][i].workerId);
+									 length_four.push(d4.length);
+								};
+
+								expTally = [length_one['length'], length_two['length'], length_three['length'], length_four['length']];	//should only have as many of these as different conditions CURRENTLY BEING RUN
+
+								if(checking == 1) {
+									console.log("got here");
+									InitialCheck(workerId);
+									checking = 0;
+								}
+								else {
+								 	CheckId();
+								}
+							})
+						  if(checking != 1) {
+								$('#question').show();
+							}
+			};
+
+			function InitialCheck(workerId) {
+				console.log("workerId is", workerId);
+				if(names_one.indexOf(workerId) > -1 || names_two.indexOf(workerId) > -1 || names_three.indexOf(workerId) > -1 || names_four.indexOf(workerId) > -1 ) {
+					swal("Sorry, you've already taken part. Thanks for your previous participation!");
+				} else {
+					swal("You're good to participate!");
+				}
+			}
+
+			function CheckId() {
+				if(names_one.indexOf(workerId) > -1 || names_two.indexOf(workerId) > -1 || names_three.indexOf(workerId) > -1 || names_four.indexOf(workerId) > -1 ) {
+					swal("Sorry, you've already taken part. Thanks for your previous participation!");
+				} else {
+					minTally = Math.min.apply(Math,expTally);
+					minExp = expTally.indexOf(minTally);
+					window.location.replace(dir + expMat[minExp] + ".html?workerId=" + workerId + "&assignmentId=" + assignmentId + "&turkSubmitTo=" + GetSubmitLocation());
+				}
+			}
+
+			function gup( name )
+				{
+				  name = name.replace(/[\[]/,"\[").replace(/[\]]/,"\]");
+				  var regexS = "[\?&]"+name+"=([^&#]*)";
+				  var regex = new RegExp( regexS );
+				  var param = regex.exec( window.location.href );
+				  if( param == null )
+				    return "";
+				  else
+				    return param[1];
+				}
+
+		</script>
+
+		<style>
+
+			#question {
+				position: absolute;
+				font-weight: bold;
+				color: green;
+				font-size: 18px;
+				text-align: center;
+			    background: black;
+			    left: 42%;
+			    top: 50%;
+			    text-align: center;
+			}
+
+			a.startExperimentButton {
+				display: none;
+			}
+
+			#check {
+				position: absolute;
+				font-weight: bold;
+				color: black;
+				font-size: 18px;
+				text-align: center;
+			    background: white;
+			    left: 25%;
+			    top: 60%;
+			    text-align: center;
+			}
+
+			.startExperimentButton {
+				color: red;
+			}
+
+		</style>
+	</head>
+	<body>
+
+	<div id = "question" class = "firstQuestion" onclick = "Start()">
+		<!--<p><input valign="center" left: 50% type="button" onclick="Start();" value="Click to Start Experiment (Don't forget to accept the hit first!)"  /></p> -->
+
+		<div class="submitButtonTooltip" data-toggle='tooltip' data-placement='bottom' title='please accept the hit first'>
+		<p style='text-align: center'><a href='javascript:Start()' class='startExperimentButton'>Start Experiment</a></p>
+ 		</div>
+ 	</div>
+
+ 	<div id="check">
+ 		<p>If you're not sure whether you've participated before, copy and paste your mturk id here and click 'check id'.<p>
+ 		<textarea id="turkerId" rows="4" cols="50"></textarea>
+		<p style='text-align: center'><a href='javascript:SaveStuff()' class='checkIdButton'>Check id</a></p>
+    </div>
+
+	</body>
+</html>
