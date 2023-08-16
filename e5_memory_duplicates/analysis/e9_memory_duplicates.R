@@ -29,8 +29,10 @@ if (!require(ggsignif)) {install.packages("ggsignif"); require(ggsignif)}
                                               ##IMPORT DATA##
 ##================================================================================================================
 
-## set directory to data folder
-dir <- setwd("/Users/julian/Documents/github/juliandefreitas/serial_self/e9_memory_duplicates/data")
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+
+# Set working directory to ../data/
+setwd("../data/")
 
 datalist = list()
 #import data using jsonlite [automate this, by defining list of data frames]

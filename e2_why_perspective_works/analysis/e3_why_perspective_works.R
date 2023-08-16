@@ -19,7 +19,11 @@ if (!require(mlogit)) {install.packages("mlogit"); require(mlogit)}
 
 ##================ import baseline condition from e1 ===================================================================================
 
-dir <- setwd("/Users/julian/Documents/github/juliandefreitas/serial_self/e1_original_or_copy/data")
+# Set wd to current folder
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+
+# Set working directory to ../e1_original_or_copy/data/
+setwd("../../e1_original_or_copy/data/")
 
 files <- list.files(pattern=('*txt'))
 myJSON <- lapply(files, function(x) fromJSON(file=x)) #join into one single JSON file
@@ -38,7 +42,11 @@ dim(data1)
 
 ##================ import data from E3 ================================================================================================
 
-dir <- setwd("/Users/julian/Documents/github/juliandefreitas/serial_self/e3_why_perspective_works/data")
+# Set wd to current folder
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+
+# Set working directory to ../e1_original_or_copy/data/
+setwd("../data/")
 
 files <- list.files(pattern=('*txt'))
 myJSON <- lapply(files, function(x) fromJSON(file=x)) #join into one single JSON file
@@ -238,6 +246,23 @@ length(identity_b_both[identity_b_both==1 & persp=='third'])/length(identity_b_b
 length(identity_b_both[identity_b_both==1 & persp=='empathy'])/length(identity_b_both[persp=='empathy'])
 length(identity_b_both[identity_b_both==1 & persp=='self'])/length(identity_b_both[persp=='self'])
 length(identity_b_both[identity_b_both==1 & persp=='full'])/length(identity_b_both[persp=='full'])
+
+##=========================== Multinomial Regression ===========================##
+
+# Taking as numeric since this is an ordinal variable
+data$persp_num_numeric <- as.numeric(data$persp_num)
+
+# Training the multinomial model
+multinom_model <- multinom(identity_name ~ persp_num_numeric, data = data)
+
+# Checking the model
+summary(multinom_model)
+
+# Calculate p-value from standard error
+z <- summary(multinom_model)$coefficients / summary(multinom_model)$standard.errors
+p <- (1 - pnorm(abs(z), 0, 1)) * 2
+print("p-values: ")
+print(p)
 
 ####### 2. Ok to terminate? ##########
 

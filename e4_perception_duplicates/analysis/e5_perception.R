@@ -29,7 +29,10 @@ if (!require(ggsignif)) {install.packages("ggsignif"); require(ggsignif)}
                                               ##IMPORT DATA##
 ##================================================================================================================
 
-dir <- setwd("/Users/julian/Documents/github/juliandefreitas/serial_self/e5_perception_duplicates/data")
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+
+# Set working directory to ../data/
+setwd("../data/")
 
 # import data
 datalist = list()
@@ -303,6 +306,20 @@ export_mat[,2] <- cond_name
 export_mat[,3] <- identity_name
 
 write.csv(export_mat, 'data_e5.csv')
+
+####============ MULTINOMIAL REGRESSION ============####
+
+# Training the multinomial model
+multinom_model <- multinom(identity_name ~ cond_name, data = export_mat)
+
+# Checking the model
+summary(multinom_model)
+
+# Calculate p-value from standard error
+z <- summary(multinom_model)$coefficients / summary(multinom_model)$standard.errors
+p <- (1 - pnorm(abs(z), 0, 1)) * 2
+print("p-values: ")
+print(p)
 
 ###================================================================================================================
                                                       ##ANALYSIS##

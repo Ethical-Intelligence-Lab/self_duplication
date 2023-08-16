@@ -20,7 +20,10 @@ if (!require(lme4)) {install.packages("lme4"); require(lme4)}
 
 ##================ import data ================================================================================================
 
-dir <- setwd("/Users/julian/Documents/github/juliandefreitas/serial_self/e4_resurrection/data")
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+
+# Set working directory to ../data/
+setwd("../data/")
 
 files <- list.files(pattern=('*txt'))
 myJSON <- lapply(files, function(x) fromJSON(file=x)) #join into one single JSON file
@@ -123,6 +126,21 @@ export_mat[,4] <- two_or_one
 
 write.csv(export_mat, 'data_e4.csv')
 
+####============ MULTINOMIAL REGRESSION ============####
+
+# Training the multinomial model
+multinom_model <- multinom(identity_name ~ cond_name, data = export_mat)
+
+# Checking the model
+summary(multinom_model)
+
+# Calculate p-value from standard error
+z <- summary(multinom_model)$coefficients / summary(multinom_model)$standard.errors
+p <- (1 - pnorm(abs(z), 0, 1)) * 2
+print("p-values: ")
+print(p)
+
+
 ##========================================== plot ======================================================================
 
 ###### 1. identity: who are you? ########
@@ -173,6 +191,11 @@ p1+scale_x_discrete(breaks = 1:length(condNames), labels=condNames)+
   scale_fill_manual(values = c("aquamarine3", "tomato3","darkcyan", "tomato4"), name="",labels=c('Original', 'Copy', 'Neither', 'Both'))
 
 ##========================================= analysis =============================================================
+
+
+# Select the participants who chose the copy before, and look at the %'s of their answers after the reviving
+table(data[data$trialStruct.identity_before == 2, 'trialStruct.identity_after'])
+
 
 ###### 1. identity: who are you? ########
 

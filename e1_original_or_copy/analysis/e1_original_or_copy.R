@@ -19,7 +19,11 @@ if (!require(mlogit)) {install.packages("mlogit"); require(mlogit)}
 
 ##================ import data ================================================================================================
 
-dir <- setwd("/Users/julian/Documents/github/juliandefreitas/serial_self/e1_original_or_copy/data")
+# Set wd to current folder
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+
+# Set working directory to ../data/
+setwd("../data/")
 
 files <- list.files(pattern=('*txt'))
 myJSON <- lapply(files, function(x) fromJSON(file=x)) #join into one single JSON file
@@ -120,6 +124,20 @@ data$persp <- persp
 data_export <- data[,c(30:37)]
 write.csv(data_export, 'data_e1.csv')
 
+####====== Multinomial Regression ======####
+
+# Training the multinomial model
+multinom_model <- multinom(identity_name ~ living + persp, data = data)
+
+# Checking the model
+summary(multinom_model)
+
+# Calculate p-value from standard error
+z <- summary(multinom_model)$coefficients / summary(multinom_model)$standard.errors
+p <- (1 - pnorm(abs(z), 0, 1)) * 2
+print("p-values: ")
+print(p)
+
 ##========================================== plot ======================================================================
 
 ###### 1. identity: who are you? ########
@@ -210,7 +228,7 @@ length(identity_b_both[identity_b_both==1 & persp=='third'])/length(identity_b_b
 ####### 2. Ok to terminate? ##########
 
 #anova
-moral_mod <- aov(moral ~ living*persp, data = data)
+moral_mod <- aov(moral ~ living * persp, data = data)
 summary(moral_mod)
 etaSquared(moral_mod) # see second column
 
