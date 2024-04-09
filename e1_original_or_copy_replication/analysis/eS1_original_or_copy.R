@@ -19,7 +19,10 @@ if (!require(mlogit)) {install.packages("mlogit"); require(mlogit)}
 
 ##================ import data ================================================================================================
 
-dir <- setwd("/Users/julian/Documents/github/juliandefreitas/serial_self/e2_original_or_copy_replication/data")
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+
+# Set working directory to ../data/
+setwd("../data/")
 
 files <- list.files(pattern=('*txt'))
 myJSON <- lapply(files, function(x) fromJSON(file=x)) #join into one single JSON file
