@@ -253,5 +253,114 @@ tes(as.numeric(first_v_third[1]), n_first, n_third) #cohen's d
 
 ####======================================= end =========================================================
 
-rm(list = ls()) 
+##==================================================================
+##                            Justin
+##==================================================================
+library(tidyverse)
 
+data |>
+  select(identity_b_copy, identity_b_original, identity_b_both, identity_b_neither, persp, living) -> d
+
+# Sample size of each condition
+table(d$persp, d$living) 
+
+d |>
+  gather(key = "identity", value = "flag", identity_b_original, identity_b_copy, identity_b_both, identity_b_neither) |>
+  filter(flag == 1) |>
+  mutate(
+    identity = gsub("identity_b_", "", identity),
+    identity_dummy = relevel(as.factor(identity), ref = "original"),
+    persp = relevel(as.factor(persp), ref = "third"),
+    living = relevel(as.factor(living), ref = "alive")
+  ) -> d_reg
+
+
+## Regressions
+reg1 <- multinom(identity_dummy ~ persp + living, data = d_reg)
+s <- summary(reg1)
+z <- s$coefficients/s$standard.errors
+p <- (1 - pnorm(abs(z), 0, 1)) * 2
+
+## (1) Identifying as COPY based on IV (Dead v. Alive)
+## Identify with copy when original is dead
+mean(d[d$living == "dead",]$identity_b_copy) * 100
+## vs Alive
+mean(d[d$living == "alive",]$identity_b_copy) * 100
+
+### Beta Coefficient
+s$coefficients[ "copy" , "livingdead" ]
+### Standard Error
+s$standard.errors[ "copy" , "livingdead" ]
+### p-value
+p[ "copy" , "livingdead" ]
+
+## (2) Identifying as COPY based on IV (First v. Third)
+## Identify with copy when perspective is first
+mean(d[d$persp == "first",]$identity_b_copy) * 100
+## vs third
+mean(d[d$persp == "third",]$identity_b_copy) * 100
+
+### Beta Coefficient
+s$coefficients[ "copy" , "perspfirst" ]
+### Standard Error
+s$standard.errors[ "copy" , "perspfirst" ]
+### p-value
+p[ "copy" , "perspfirst" ]
+
+## (3) Identifying as BOTH based on IV (First v. Third)
+## Identify with both when perspective is first
+mean(d[d$persp == "first",]$identity_b_both) * 100
+## vs third
+mean(d[d$persp == "third",]$identity_b_both) * 100
+
+### Beta Coefficient
+s$coefficients[ "both" , "perspfirst" ]
+### Standard Error
+s$standard.errors[ "both" , "perspfirst" ]
+### p-value
+p[ "both" , "perspfirst" ]
+
+## (4) Identifying as BOTH based on IV (Dead v. Alive)
+## Identify with both when original is dead
+mean(d[d$living == "dead",]$identity_b_both) * 100
+## vs Alive
+mean(d[d$living == "alive",]$identity_b_both) * 100
+
+### Beta Coefficient
+s$coefficients[ "both" , "livingdead" ]
+### Standard Error
+s$standard.errors[ "both" , "livingdead" ]
+### p-value
+p[ "both" , "livingdead" ]
+
+## (5) Identifying as NEITHER based on IV (First v. Third)
+## Identify with both when perspective is first
+mean(d[d$persp == "first",]$identity_b_neither) * 100
+## vs third
+mean(d[d$persp == "third",]$identity_b_neither) * 100
+
+### Beta Coefficient
+s$coefficients[ "neither" , "perspfirst" ]
+### Standard Error
+s$standard.errors[ "neither" , "perspfirst" ]
+### p-value
+p[ "neither" , "perspfirst" ]
+
+## (6) Identifying as NEITHER based on IV (Dead v. Alive)
+## Identify with neither when original is dead
+mean(d[d$living == "dead",]$identity_b_neither) * 100
+## vs Alive
+mean(d[d$living == "alive",]$identity_b_neither) * 100
+
+### Beta Coefficient
+s$coefficients[ "neither" , "livingdead" ]
+### Standard Error
+s$standard.errors[ "neither" , "livingdead" ]
+### p-value
+p[ "neither" , "livingdead" ]
+
+## Notable Difference
+### identifies as both
+mean(d[d$living == "alive" & d$persp == "first",]$identity_b_both) * 100
+### identifies as original
+mean(d[d$living == "alive" & d$persp == "first",]$identity_b_original) * 100
