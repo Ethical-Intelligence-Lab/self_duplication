@@ -154,3 +154,16 @@ p > 0.09
 #====================================================================================
 #                               VISUALIZATION
 #====================================================================================
+
+p1<-ggplot(identity.mat, aes(x=factor(cond),y=mean,fill=factor(answer)))+
+  stat_summary(fun.y=mean,position=position_dodge(),geom="bar",width = 0.5)+
+  theme_bw()+coord_cartesian(ylim=c(0, 1))+
+  theme(axis.title.x = element_blank()) + 
+  theme_classic() 
+p1+scale_x_discrete(breaks = 1:length(condNames), labels=condNames)+
+  theme(legend.key=element_blank(), legend.box="horizontal", legend.position = c(0.5, 0.95), legend.direction="horizontal")+
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())+
+  theme(text = element_text(size=30), axis.text.x = element_text(angle = 45, hjust=1,vjust=0.8))+
+  ylab("Proportion of Identifications")+xlab ("")+
+  theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0)))+
+  scale_fill_manual(values = c("aquamarine3", "tomato3","darkcyan", "tomato4"), name="",labels=c('Original', 'Copy', 'Neither', 'Both'))
