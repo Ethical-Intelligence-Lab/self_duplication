@@ -94,9 +94,9 @@ data |>
     ),
     identity = as.factor(identity),
     copy = ifelse(identity == 2, 1, 0),
-    both = ifelse(identity == 3, 1, 0),
+    both = ifelse(identity == 4, 1, 0),
     original = ifelse(identity == 1, 1, 0),
-    neither = ifelse(identity == 4, 1, 0),
+    neither = ifelse(identity == 3, 1, 0),
   ) -> d
 
 ## Regressions
@@ -129,13 +129,9 @@ p[ "4" , "persp" ]
 #                               VISUALIZATION
 #====================================================================================
 
-data |>
+d |>
   ungroup() |>
-  mutate(cond = as.factor(persp),
-         copy = ifelse(identity == 2, 1, 0),
-         both = ifelse(identity == 4, 1, 0),
-         original = ifelse(identity == 1, 1, 0),
-         neither = ifelse(identity == 3, 1, 0), ) |>
+  mutate(cond = as.factor(persp)) |>
   select(cond, original, copy, neither, both) |>
   group_by(cond) |>
   summarize_all(
@@ -148,12 +144,6 @@ data |>
       answer == "copy" ~ 2,
       answer == "neither" ~ 3,
       answer == "both" ~ 4,
-    )),
-    cond = as.factor(case_when(
-      cond == "third" ~ 1,
-      cond == "empathy" ~ 2,
-      cond == "self" ~ 3,
-      cond == "full" ~ 4,
     ))) -> d_plot
 
 theme_update(plot.title = element_text(hjust = 0.5))

@@ -34,16 +34,20 @@ data <- do.call(rbind,
                 lapply(list.files(pattern=('*txt')), 
                 function(x) as.data.frame(fromJSON(fil =x)))) 
 
+## Before attention
+nrow(data)
+
 ## Attention Checks
 data |>
-  filter(trialStruct.attention == 0 & trialStruct.comp_number_copies == 2) -> data
+  filter(trialStruct.attention == 0)  -> data
 
-## Number of Participants
+## Number of Participants after attention exclusion
 nrow(data)
 
 ## Comprehension Checks
 data |>
   filter(
+      trialStruct.comp_number_copies == 2,
       (trialStruct.cond_num == 1 & trialStruct.comp_original_you == 1) |
       (trialStruct.cond_num == 2 & trialStruct.comp_original_you == 1) |
       (trialStruct.cond_num == 3 & trialStruct.comp_original_you == 2) |
@@ -65,8 +69,8 @@ data |>
   mutate(
     copy = ifelse(identity == 2, 1, 0),
     original = ifelse(identity == 1, 1, 0),
-    both = ifelse(identity == 3, 1, 0),
-    neither = ifelse(identity == 4, 1, 0)
+    both = ifelse(identity == 4, 1, 0),
+    neither = ifelse(identity == 3, 1, 0)
   ) -> data
 
 ## Demographics
@@ -183,7 +187,7 @@ theme_update(plot.title = element_text(hjust = 0.5))
 x_scale_labels <- c("Alive-Third P", "Alive-First P", "Dead-Third P", "Dead-First P")
 
 ggplot(d_plot, aes(x = cond ,y = mean, fill = factor(answer)))+
-  stat_summary(fun.y=mean,position=position_dodge(),geom="bar",width = 0.5)+
+  stat_summary(fun=mean,position=position_dodge(),geom="bar",width = 0.5)+
   theme_bw()+coord_cartesian(ylim=c(0, 1))+
   theme(axis.title.x = element_blank()) + 
   theme_classic() +

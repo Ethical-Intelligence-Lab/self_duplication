@@ -1,7 +1,7 @@
 #====================================================================================
 # Julian De Freitas, 2019
 # Analysis script for De Freitas, Rips, & Alvarez - The limit of personal identity
-# Experiment 1
+# Experiment S1
 #====================================================================================
 
 ## clear workspace
@@ -34,9 +34,11 @@ data <- do.call(rbind,
                 lapply(list.files(pattern=('*txt')), 
                        function(x) as.data.frame(fromJSON(fil =x)))) 
 
+nrow(data)
+
 ## Attention Checks
 data |>
-  filter(trialStruct.attention == 0 & trialStruct.comp_number_copies == 2) -> data
+  filter(trialStruct.attention == 0) -> data
 
 ## Number of Participants
 nrow(data)
@@ -44,7 +46,8 @@ nrow(data)
 ## Comprehension Checks
 data |>
   filter(
-    (trialStruct.cond_num == 1 & trialStruct.comp_original_you == 1) |
+      trialStruct.comp_number_copies == 2,
+      (trialStruct.cond_num == 1 & trialStruct.comp_original_you == 1) |
       (trialStruct.cond_num == 2 & trialStruct.comp_original_you == 1) |
       (trialStruct.cond_num == 3 & trialStruct.comp_original_you == 2) |
       (trialStruct.cond_num == 4 & trialStruct.comp_original_you == 2)
@@ -65,8 +68,8 @@ data |>
   mutate(
     copy = ifelse(identity == 2, 1, 0),
     original = ifelse(identity == 1, 1, 0),
-    both = ifelse(identity == 3, 1, 0),
-    neither = ifelse(identity == 4, 1, 0)
+    both = ifelse(identity == 4, 1, 0),
+    neither = ifelse(identity == 3, 1, 0)
   ) -> data
 
 ## Demographics
@@ -126,7 +129,7 @@ s$standard.errors[ "copy" , "perspfirst" ]
 p[ "copy" , "perspfirst" ]
 
 ## (3) Identifying as BOTH based on IV (First v. Third)
-## Identify with both when perspective is first
+## Identify with copy when perspective is first
 mean(d[d$persp == "first",]$both) * 100
 ## vs third
 mean(d[d$persp == "third",]$both) * 100
@@ -164,7 +167,8 @@ s$standard.errors[ "neither" , "perspfirst" ]
 ### p-value
 p[ "neither" , "perspfirst" ]
 
-## (6) Identifying as NEITHER based on IV (Dead v. Alive)
+## [Not Significant]
+## (5) Identifying as NEITHER based on IV (Dead v. Alive) 
 ## Identify with neither when original is dead
 mean(d[d$living == "dead",]$neither) * 100
 ## vs Alive
@@ -207,8 +211,8 @@ data |>
     answer = as.factor(case_when(
       answer == "original" ~ 1,
       answer == "copy" ~ 2,
-      answer == "neither" ~ 4,
-      answer == "both" ~ 3,
+      answer == "neither" ~ 3,
+      answer == "both" ~ 4,
     )))-> d_plot
 
 theme_update(plot.title = element_text(hjust = 0.5))
@@ -216,8 +220,8 @@ theme_update(plot.title = element_text(hjust = 0.5))
 x_scale_labels <- c("Alive-Third P", "Alive-First P", "Dead-Third P", "Dead-First P")
 
 ggplot(d_plot, aes(x = cond ,y = mean, fill = factor(answer)))+
-  stat_summary(fun.y=mean,position=position_dodge(),geom="bar",width = 0.5)+
-  theme_bw()+coord_cartesian(ylim=c(0, 1))+
+  stat_summary(fun = mean, position = position_dodge(), geom = "bar", width = 0.5) +
+  coord_cartesian(ylim = c(0, 1)) +
   theme(axis.title.x = element_blank()) + 
   theme_classic() +
   scale_x_discrete(breaks = 1:4, labels = x_scale_labels) +
