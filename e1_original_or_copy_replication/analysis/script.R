@@ -32,7 +32,7 @@ setwd("../data/")
 
 data <- do.call(rbind, 
                 lapply(list.files(pattern=('*txt')), 
-                function(x) as.data.frame(fromJSON(fil =x)))) 
+                       function(x) as.data.frame(fromJSON(fil =x)))) 
 
 ## Attention Checks
 data |>
@@ -44,7 +44,7 @@ nrow(data)
 ## Comprehension Checks
 data |>
   filter(
-      (trialStruct.cond_num == 1 & trialStruct.comp_original_you == 1) |
+    (trialStruct.cond_num == 1 & trialStruct.comp_original_you == 1) |
       (trialStruct.cond_num == 2 & trialStruct.comp_original_you == 1) |
       (trialStruct.cond_num == 3 & trialStruct.comp_original_you == 2) |
       (trialStruct.cond_num == 4 & trialStruct.comp_original_you == 2)
@@ -80,28 +80,18 @@ table(data$sex)
 data |>
   select(copy, original, both, neither, persp, living) -> d
 
+# Sample size of each condition
 table(d$persp, d$living) 
 
-# For third and living 
-## Identify as ORIGINAL
-mean(d[d$persp == "third" & d$living == "alive",]$original)
-## Identify as COPY
-mean(d[d$persp == "third" & d$living == "alive",]$copy)
-## Identify as BOTH
-mean(d[d$persp == "third" & d$living == "alive",]$both)
-## Identify as NEITHER
-mean(d[d$persp == "third" & d$living == "alive",]$neither)
-
-
 d |>
-  gather(key = "identity", value = "flag", original, copy, both, neither) |>
+  gather(key = "identity", value = "flag", copy, original, both, neither) |>
   filter(flag == 1) |>
   mutate(
-    identity = gsub("", "", identity),
     identity_dummy = relevel(as.factor(identity), ref = "original"),
     persp = relevel(as.factor(persp), ref = "third"),
     living = relevel(as.factor(living), ref = "alive")
   ) -> d_reg
+
 
 ## Regressions
 reg1 <- multinom(identity_dummy ~ persp + living, data = d_reg)
@@ -148,8 +138,51 @@ s$standard.errors[ "both" , "perspfirst" ]
 ### p-value
 p[ "both" , "perspfirst" ]
 
-## OTHER COEFFICIENTS not significant
-p > 0.09
+## (4) Identifying as BOTH based on IV (Dead v. Alive)
+## Identify with both when original is dead
+mean(d[d$living == "dead",]$both) * 100
+## vs Alive
+mean(d[d$living == "alive",]$both) * 100
+
+### Beta Coefficient
+s$coefficients[ "both" , "livingdead" ]
+### Standard Error
+s$standard.errors[ "both" , "livingdead" ]
+### p-value
+p[ "both" , "livingdead" ]
+
+## (5) Identifying as NEITHER based on IV (First v. Third)
+## Identify with both when perspective is first
+mean(d[d$persp == "first",]$neither) * 100
+## vs third
+mean(d[d$persp == "third",]$neither) * 100
+
+### Beta Coefficient
+s$coefficients[ "neither" , "perspfirst" ]
+### Standard Error
+s$standard.errors[ "neither" , "perspfirst" ]
+### p-value
+p[ "neither" , "perspfirst" ]
+
+## (6) Identifying as NEITHER based on IV (Dead v. Alive)
+## Identify with neither when original is dead
+mean(d[d$living == "dead",]$neither) * 100
+## vs Alive
+mean(d[d$living == "alive",]$neither) * 100
+
+### Beta Coefficient
+s$coefficients[ "neither" , "livingdead" ]
+### Standard Error
+s$standard.errors[ "neither" , "livingdead" ]
+### p-value
+p[ "neither" , "livingdead" ]
+
+## Notable Difference
+### identifies as both
+mean(d[d$living == "alive" & d$persp == "first",]$both) * 100
+### identifies as original
+mean(d[d$living == "alive" & d$persp == "first",]$original) * 100
+
 
 #====================================================================================
 #                               VISUALIZATION

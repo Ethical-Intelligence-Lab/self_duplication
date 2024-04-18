@@ -231,6 +231,46 @@ length(identity_b_both[identity_b_both==1 & cond==1])/length(identity_b_both[con
 #summary(glmer_both)
 
 ####======================================= end =========================================================
+library(tidyverse)
 
-rm(list = ls()) 
+data |>
+  select(trialStruct.identity_before, trialStruct.identity_after) |>
+  mutate( initial_copy = ifelse(trialStruct.identity_before == 2, 1, 0) ) -> d
 
+colnames(d) <- c("dead", "revived", "initial_copy")
+
+d |>
+  gather(key = "condition", value = "identity", dead, revived) |>
+  mutate(
+    copy = ifelse(identity == 2, 1, 0),
+    original = ifelse(identity == 1, 1, 0),
+    both = ifelse(identity == 3, 1, 0),
+    neither = ifelse(identity == 4, 1, 0),
+    condition = relevel(as.factor(condition), ref = "dead")
+  ) -> d
+
+reg1 <- multinom(identity ~ condition, data = d)
+s <- summary(reg1)
+z <- s$coefficients/s$standard.errors
+p <- (1 - pnorm(abs(z), 0, 1)) * 2
+
+## Proportion that selected COPY by Condition
+prop.table(table(d$identity, d$condition), margin = 2)["2",] * 100
+
+### Beta Coefficient
+s$coefficients[ "2" , "conditionrevived" ]
+### Standard Error
+s$standard.errors[ "2" , "conditionrevived" ]
+### p-value
+p[ "2" , "conditionrevived" ]
+
+## p-value for NEITHER and BOTH
+p[ "3" , "conditionrevived" ]
+p[ "4" , "conditionrevived" ]
+
+## Focus on INITIALLY identifying as COPY
+d |>
+  filter(initial_copy == 1) -> d_copy
+
+## Proportion that selected
+prop.table(table(d_copy[d_copy$condition == "revived",]$identity)) * 100
