@@ -57,10 +57,12 @@ dim(data2) #301
 data2$trialStruct.cond_num <- data2$trialStruct.cond_num + 1
 
 #exclude those who failed attention and comprehension checks
-data2 <- subset(data2, data2$trialStruct.attention == 0 & 
-                 data2$trialStruct.comp_original_you == 2 & data2$trialStruct.comp_number_copies == 2)
+data2 <- subset(data2, data2$trialStruct.attention == 0)
+n_initial <- dim(data2)[1]; n_initial
 
-dim(data2)
+data2 <- subset(data2, (data2$trialStruct.comp_original_you == 2 & data2$trialStruct.comp_number_copies == 2))
+n_final <- dim(data2)[1]; n_final
+
 age <- as.numeric(data2$trialStruct.age); mean(age,na.rm = TRUE) 
 gender <- as.factor(data2$trialStruct.sex); table(gender)[2]/sum(table(gender)) 
 

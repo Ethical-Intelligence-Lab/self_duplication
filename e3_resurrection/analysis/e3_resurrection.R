@@ -30,16 +30,14 @@ myJSON <- lapply(files, function(x) fromJSON(file=x)) #join into one single JSON
 (data <- lapply(myJSON, function(myJSON) { as.data.frame(myJSON) }))
 data <- (data <- do.call(rbind, data))
 
-n_before_excl <- dim(data); n_before_excl #208
-
 ##======================== counts and exclusions ================================================================================
 
 #exclude those who failed attention check
-data <- subset(data, data$trialStruct.attention == 0 & 
-                 data$trialStruct.comp_original_you == 3 & data$trialStruct.comp_number_copies == 2)
+data <- subset(data, data$trialStruct.attention == 0)
+n_initial <- dim(data)[1]; n_initial
 
-n_after_excl <- dim(data); n_after_excl #176
-n_excl <- n_before_excl - n_after_excl; n_excl
+data <- subset(data, (data$trialStruct.comp_original_you == 3 & data$trialStruct.comp_number_copies == 2))
+n_final <- dim(data)[1]; n_final
 
 age <- as.numeric(data$trialStruct.age); mean(age,na.rm = TRUE) #35.1
 gender <- as.factor(data$trialStruct.sex); table(gender)[2]/sum(table(gender)) #56%
