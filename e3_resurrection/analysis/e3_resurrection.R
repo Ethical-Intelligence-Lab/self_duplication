@@ -122,8 +122,6 @@ export_mat[,2] <- cond_name
 export_mat[,3] <- identity_name
 export_mat[,4] <- two_or_one
 
-write.csv(export_mat, 'data_e4.csv')
-
 ####============ MULTINOMIAL REGRESSION ============####
 
 # Training the multinomial model

@@ -148,10 +148,6 @@ for(i in 1:length(persp)) {
 persp_num <- as.factor(data$persp_num)
 data$persp_num <- persp_num
 
-#export data for multinomial logistic regression
-data_export <- data[,c(29:36)]
-write.csv(data_export, 'data_e3.csv')
-
 ##========================================== plot ======================================================================
 
 ###### 1. identity: who are you? ########
@@ -287,51 +283,3 @@ alive_v_dead <- t.test(moral ~ persp, var.equal=TRUE, paired=FALSE); alive_v_dea
 tes(as.numeric(alive_v_dead[1]), n_third, n_third) #cohen's d
 
 ####======================================= end =========================================================
-
-library(tidyverse)
-
-data |>
-  select(trialStruct.perspective_cond, trialStruct.identity) -> d
-
-colnames(d) <- c("persp", "identity")
-
-d |>
-  mutate(
-    persp = case_when(
-      persp == "third" ~ 1,
-      persp == "empathy" ~ 2,
-      persp == "self" ~ 3,
-      persp == "full" ~ 4
-    ),
-    identity = as.factor(identity),
-    copy = ifelse(identity == 2, 1, 0),
-    both = ifelse(identity == 4, 1, 0)
-  ) -> d
-
-prop.table(table(d$persp, d$copy), margin = 1) * 100
-
-## Regressions
-reg1 <- multinom(identity ~ persp, data = d)
-s <- summary(reg1)
-z <- s$coefficients/s$standard.errors
-p <- (1 - pnorm(abs(z), 0, 1)) * 2
-
-## Percentage that chose COPY per condition
-prop.table(table(d$persp, d$copy), margin = 1)[,2] * 100
-
-### Beta Coefficient
-s$coefficients[ "2" , "persp" ]
-### Standard Error
-s$standard.errors[ "2" , "persp" ]
-### p-value
-p[ "2" , "persp" ]
-
-## Percentage that chose BOTH per condition
-prop.table(table(d$persp, d$both), margin = 1)[,2] * 100
-
-### Beta Coefficient
-s$coefficients[ "4" , "persp" ]
-### Standard Error
-s$standard.errors[ "4" , "persp" ]
-### p-value
-p[ "4" , "persp" ]

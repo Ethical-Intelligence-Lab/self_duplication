@@ -120,10 +120,6 @@ identity_b_both <- as.numeric(data$identity_b_both)
 data$living <- living
 data$persp <- persp
 
-#export subset of data for multinomial logistic regression in SPSS
-data_export <- data[,c(30:37)]
-write.csv(data_export, 'data_e1.csv')
-
 ####====== Multinomial Regression ======####
 
 # Training the multinomial model
@@ -259,82 +255,3 @@ first_v_third <- t.test(moral ~ persp, var.equal=TRUE, paired=FALSE); first_v_th
 tes(as.numeric(first_v_third[1]), n_first, n_third) #cohen's d
 
 ####======================================= end =========================================================
-
-##==================================================================
-##                            Justin
-##==================================================================
-library(tidyverse)
-
-data |>
-  select(identity_b_copy, identity_b_original, identity_b_both, identity_b_neither, persp, living) -> d
-
-table(d$persp, d$living) 
-
-# For third and living 
-## Identify as ORIGINAL
-mean(d[d$persp == "third" & d$living == "alive",]$identity_b_original)
-## Identify as COPY
-mean(d[d$persp == "third" & d$living == "alive",]$identity_b_copy)
-## Identify as BOTH
-mean(d[d$persp == "third" & d$living == "alive",]$identity_b_both)
-## Identify as NEITHER
-mean(d[d$persp == "third" & d$living == "alive",]$identity_b_neither)
-
-
-d |>
-  gather(key = "identity", value = "flag", identity_b_original, identity_b_copy, identity_b_both, identity_b_neither) |>
-  filter(flag == 1) |>
-  mutate(
-    identity = gsub("identity_b_", "", identity),
-    identity_dummy = relevel(as.factor(identity), ref = "original"),
-    persp = relevel(as.factor(persp), ref = "third"),
-    living = relevel(as.factor(living), ref = "alive")
-    ) -> d_reg
-
-## Regressions
-reg1 <- multinom(identity_dummy ~ persp + living, data = d_reg)
-s <- summary(reg1)
-z <- s$coefficients/s$standard.errors
-p <- (1 - pnorm(abs(z), 0, 1)) * 2
-
-## (1) Identifying as COPY based on IV (Dead v. Alive)
-## Identify with copy when original is dead
-mean(d[d$living == "dead",]$identity_b_copy) * 100
-## vs Alive
-mean(d[d$living == "alive",]$identity_b_copy) * 100
-
-### Beta Coefficient
-s$coefficients[ "copy" , "livingdead" ]
-### Standard Error
-s$standard.errors[ "copy" , "livingdead" ]
-### p-value
-p[ "copy" , "livingdead" ]
-
-## (2) Identifying as COPY based on IV (First v. Third)
-## Identify with copy when perspective is first
-mean(d[d$persp == "first",]$identity_b_copy) * 100
-## vs third
-mean(d[d$persp == "third",]$identity_b_copy) * 100
-
-### Beta Coefficient
-s$coefficients[ "copy" , "perspfirst" ]
-### Standard Error
-s$standard.errors[ "copy" , "perspfirst" ]
-### p-value
-p[ "copy" , "perspfirst" ]
-
-## (3) Identifying as BOTH based on IV (First v. Third)
-## Identify with both when perspective is first
-mean(d[d$persp == "first",]$identity_b_both) * 100
-## vs third
-mean(d[d$persp == "third",]$identity_b_both) * 100
-
-### Beta Coefficient
-s$coefficients[ "both" , "perspfirst" ]
-### Standard Error
-s$standard.errors[ "both" , "perspfirst" ]
-### p-value
-p[ "both" , "perspfirst" ]
-
-## OTHER COEFFICIENTS not significant
-p > 0.09
