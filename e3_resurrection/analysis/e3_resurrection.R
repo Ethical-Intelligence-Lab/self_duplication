@@ -186,6 +186,8 @@ p1+scale_x_discrete(breaks = 1:length(condNames), labels=condNames)+
   theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0)), axis.title.x = element_text(margin = margin(t = 20, r = 0, b = 0, l = 0)))+
   scale_fill_manual(values = c("aquamarine3", "tomato3","darkcyan", "tomato4"), name="",labels=c('Original', 'Copy', 'Neither', 'Both'))
 
+
+
 ##========================================= analysis =============================================================
 
 

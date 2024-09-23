@@ -135,6 +135,8 @@ theme_update(plot.title = element_text(hjust = 0.5))
 
 x_scale_labels <- c("Identity", "Practical Matters")
 
+pdf("fig4.pdf", width = 8, height = 6)
+
 ggplot(d_plot1, aes(x = cond ,y = mean, fill = factor(answer)))+
   stat_summary(fun = mean, position = position_dodge(), geom = "bar", width = 0.5) +
   coord_cartesian(ylim = c(0, 0.70)) +
@@ -147,6 +149,7 @@ ggplot(d_plot1, aes(x = cond ,y = mean, fill = factor(answer)))+
   ylab("Proportion of Choices")+
   xlab("") +
   theme(axis.title.y = element_text(margin = margin(t = 0, r = 20, b = 0, l = 0))) +
-  scale_fill_manual(values = c("aquamarine3", "tomato3","darkcyan", "tomato4"), name = "", 
+  scale_fill_manual(values = c("aquamarine3", "tomato3", "tomato4", "darkcyan"), name = "", 
                     labels = c('Relative', 'Friend', 'Both', 'Unsure'))
 
+dev.off()

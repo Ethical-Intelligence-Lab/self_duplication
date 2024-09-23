@@ -28,7 +28,7 @@ pacman::p_load('rjson',
 
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
-data <- read.csv("data.csv")
+data <- read.csv("data_label.csv")
 data <- data[-c(1,2),]
 
 ## Attention Checks
@@ -44,8 +44,16 @@ data |>
     comp_q == "Teletransportation"
   ) -> data
 
+## Also exclude those who wrote nonsense 
+data |>
+  filter(exclude_written == "0" | exclude_written == "3") -> data
+
 ## Final Sample
 final_sample <- nrow(data); final_sample
+
+## Check consistency of written responses against choices
+non_na_values <- data$consistent[!is.na(data$consistent)]
+table(non_na_values)[2]/sum(table(non_na_values))
 
 ## Organize
 data <- data %>%
@@ -54,6 +62,13 @@ data <- data %>%
 data$cond_name <- ifelse(data$cond==1, 'basic', 'perspective')
 
 ## Demographics
+
+#fix incorrect age entries
+data$age[49] <- "34"
+data$age[55] <- "34"
+data$age[84] <- "34"
+data$age[91] <- "36"
+
 mean(as.numeric(data$age))
 table(data$gender)
 table(data$cond)
@@ -70,6 +85,23 @@ cohen.d(data$identity, data$cond_name)
 
 table(p_data$simultaneous_or_flip)
 prop.table(table(p_data$simultaneous_or_flip))
+
+# ratings contingent upon choice
+two_perspectives <- subset(p_data, p_data$simultaneous_or_flip == "Two consciousnesses")
+mean(two_perspectives$identity)
+sd(two_perspectives$identity)
+
+single_split <- subset(p_data, p_data$simultaneous_or_flip == "Single consciousness, split screen")
+mean(single_split$identity)
+sd(single_split$identity)
+
+single_flipping <- subset(p_data, p_data$simultaneous_or_flip == "Single consciousness, flipping")
+mean(single_flipping$identity)
+sd(single_flipping$identity)
+
+single_simultaneous <- subset(p_data, p_data$simultaneous_or_flip == "Single consciousness, simultaneous")
+mean(single_simultaneous$identity)
+sd(single_simultaneous$identity)
 
 # end ====================================================================================
 
