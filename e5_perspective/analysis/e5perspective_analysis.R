@@ -44,9 +44,9 @@ data |>
     comp_q == "Teletransportation"
   ) -> data
 
-## Also exclude those who wrote nonsense 
-data |>
-  filter(exclude_written == "0" | exclude_written == "3") -> data
+## Also exclude those who wrote nonsense [**TOGGLE AS NEEDED**]
+#data |>
+#  filter(exclude_written == "0" | exclude_written == "3") -> data
 
 ## Final Sample
 final_sample <- nrow(data); final_sample
